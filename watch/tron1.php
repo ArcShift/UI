@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title></title>
+        <style>
+            #watch{
+                transform: scale(2) translate(0, 50px);
+            }
+        </style>
+    </head>
+    <body style="background-color: black">
+        <div style="display: grid; place-items: center;">
+            <svg id="watch" xmlns="http://www.w3.org/2000/svg" width="200" height="200">
+            <!-- Watch case -->
+            <circle cx="100" cy="100" r="90" stroke-dasharray="0.2 0.8"
+                    stroke-dashoffset="0.1"
+                    pathLength="60" stroke="cyan" stroke-width="5" />
+            <circle cx="100" cy="100" r="45" stroke-dasharray="0.7 0.3" stroke-dashoffset="0.3"
+                    pathLength="12" stroke="cyan" stroke-width="7" fill="none"/>
+
+            <!-- Watch face -->
+
+            <!-- Hour hand -->
+            <line id="hour-hand" x1="100" y1="100" x2="100" y2="60" stroke="orange" stroke-width="4" />
+            <!-- Minute hand -->
+            <line id="minute-hand" x1="100" y1="100" x2="100" y2="40" stroke="orange" stroke-width="2" />
+            <!-- Second hand -->
+            <line id="second-hand" x1="100" y1="100" x2="100" y2="30" stroke="yellow" stroke-width="1" />
+            <!-- Center dot -->
+            <circle cx="100" cy="100" r="4" stroke="black" stroke-width="2" fill="cyan" />
+            </svg>
+        </div>
+    </body>
+    <script>
+        // Get the SVG element
+        const svg = document.getElementById("watch");
+        // Get the watch hands by their IDs
+        const hourHand = svg.getElementById("hour-hand");
+        const minuteHand = svg.getElementById("minute-hand");
+        const secondHand = svg.getElementById("second-hand");
+        // Function to update the rotation of the hands
+        function updateWatchHands() {
+            const now = new Date();
+            const hours = now.getHours();
+            const minutes = now.getMinutes();
+            const seconds = now.getSeconds();
+            const hourRotation = (hours % 12) * 30 + minutes / 2;
+            const minuteRotation = minutes * 6 + seconds / 10;
+            const secondRotation = seconds * 6;
+            hourHand.setAttribute("transform", `rotate(${hourRotation}, 100, 100)`);
+            minuteHand.setAttribute("transform", `rotate(${minuteRotation}, 100, 100)`);
+            secondHand.setAttribute("transform", `rotate(${secondRotation}, 100, 100)`);
+        }
+        // Update the watch hands initially
+        updateWatchHands();
+        // Update the watch hands every second (1000 milliseconds)
+        setInterval(updateWatchHands, 1000);
+
+        for (var i = 1; i <= 12; i++) {
+            // Input derajat
+            var degree = 30 * i - 90;
+            // Konversi derajat ke radian
+            var radian = degree * Math.PI / 180;
+            // Koordinat pusat lingkaran
+            var cx = 100;
+            var cy = 100;
+            // Jari-jari lingkaran
+            var r = 70;
+            // Menghitung koordinat x dan y
+            var x = cx + r * Math.cos(radian);
+            var y = cy + r * Math.sin(radian);
+            // Create a new text element
+            const newText = document.createElementNS("http://www.w3.org/2000/svg", "text");
+            newText.setAttribute("x", x);
+            newText.setAttribute("y", y);
+            newText.setAttribute("text-anchor", "middle");
+            newText.setAttribute("fill", "cyan");
+            newText.setAttribute("dominant-baseline", "middle");
+
+            newText.textContent = i;
+            // Append the text element to the text group
+            svg.appendChild(newText);
+        }
+    </script>
+</html>
