@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Webcam to ASCII</title>
+    <style>
+        body {
+            margin: 0;
+        }
+        #ascii {
+            font-family: monospace;
+            white-space: pre;
+            color: green;
+            /* Text color */
+            background-color: black;
+            /* Background color */
+            margin: 0;
+            padding: 10px;
+            overflow: hidden;
+            width: 1280px;
+            /* Ensure width matches video */
+            height: 1000px;
+            /* Ensure height matches video */
+            border: 1px solid #444;
+        }
+
+        #video {
+            position: fixed;
+            /* display: none; */
+            /* transform: scaleX(-1); */
+        }
+    </style>
+</head>
+
+<body>
+    <video id="video" width="100" height="100" autoplay></video>
+    <pre id="ascii"></pre>
+    <script>
+        // ascii.js
+
+        const video = document.getElementById('video');
+        const asciiElement = document.getElementById('ascii');
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+
+        // ASCII characters from dark to light
+        const ASCII_CHARS = ".:-*#%@";
+
+        // Variable for step size
+        const STEP_SIZE = 4; // Adjust this value to change the resolution
+
+        function setupWebcam() {
+            navigator.mediaDevices.getUserMedia({ video: true })
+                .then(stream => {
+                    video.srcObject = stream;
+                    video.onloadedmetadata = () => {
+                        video.play();
+                        canvas.width = video.videoWidth || 640;
+                        canvas.height = video.videoHeight || 480;
+                        startDrawing();
+                    };
+                })
+                .catch(error => {
+                    console.error('Error accessing webcam:', error);
+                });
+        }
+
+        function startDrawing() {
+            function draw() {
+                if (video.videoWidth && video.videoHeight) {
+                    canvas.width = video.videoWidth;
+                    canvas.height = video.videoHeight;
+                    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+                    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                    const asciiImage = convertToAscii(imageData);
+                    asciiElement.textContent = asciiImage;
+                }
+                requestAnimationFrame(draw);
+            }
+
+            draw();
+        }
+
+        function convertToAscii(imageData) {
+            const { width, height, data } = imageData;
+            let asciiImage = '';
+
+            for (let y = 0; y < height; y += STEP_SIZE*2) { // Use the step size variable
+                for (let x = 0; x < width; x += STEP_SIZE) {
+                    const idx = (y * width + x) * 4;
+                    const r = data[idx];
+                    const g = data[idx + 1];
+                    const b = data[idx + 2];
+                    const avg = (r + g + b) / 3;
+                    const char = ASCII_CHARS[Math.floor(avg / 255 * (ASCII_CHARS.length - 1))];
+                    asciiImage += char;
+                }
+                asciiImage += '\n';
+            }
+            return asciiImage;
+        }
+
+        setupWebcam();
+
+
+    </script>
+</body>
+
+</html>
